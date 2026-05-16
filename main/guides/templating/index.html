@@ -1085,6 +1085,8 @@
       
         
       
+        
+      
     
     
     
@@ -1294,6 +1296,34 @@
     
   
     Google Container Registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/generator/grafana/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grafana
   
 
     
@@ -5400,6 +5430,7 @@ Example: <strong><code>{{ index .data "service-account-token" }}</code></strong>
 <span class="w">  </span><span class="err">...</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>You may either pass <code>bcrypt</code>, to use that hashing algorithm, or <code>sha</code>, to use the <code>SHA-1</code> hashing algorithm, as an argument. <code>bcrypt</code> is considered more secure, but some applications may not support it.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-secrets.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ExternalSecret</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -5415,7 +5446,7 @@ Example: <strong><code>{{ index .data "service-account-token" }}</code></strong>
 <span class="w">        </span><span class="nt">literal</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|-</span>
 <span class="w">          </span><span class="no">{{- $creds := list }}</span>
 <span class="w">          </span><span class="no">{{- range $user, $pw := . }}</span>
-<span class="w">            </span><span class="no">{{- $creds = append $creds (printf &quot;%s&quot; (htpasswd $user $pw)) }}</span>
+<span class="w">            </span><span class="no">{{- $creds = append $creds (printf &quot;%s&quot; (htpasswd $user $pw &quot;bcrypt&quot;)) }}</span>
 <span class="w">          </span><span class="no">{{- end }}</span>
 <span class="w">          </span><span class="no">auth: {{ $creds | join &quot;\n&quot; | quote }}</span>
 <span class="w">  </span><span class="nt">dataFrom</span><span class="p">:</span>
@@ -5545,13 +5576,17 @@ NtFUGA95RGN9s+pl6XY0YARPHf5O76ErC1OZtDTR5RdyQfcM+94gYZsexsXl0aQO
 <h3 id="rsa-decryption-data-from-provider">RSA Decryption Data From Provider</h3>
 <p>When a provider returns RSA-encrypted values, you can decrypt them directly in the template using the <code>rsaDecrypt</code> functions (engine v2).
 <code>rsaDecrypt</code> performs decryption with the private key passed through the pipeline: <code>&lt;privateKeyPEM | rsaDecrypt "&lt;SCHEME&gt;" "&lt;HASH&gt;" &lt;ciphertext&gt; &gt;</code>. <code>SCHEME</code> and <code>HASH</code> are strings (for example, <code>"RSA-OAEP"</code> and <code>"SHA1"</code>). The third argument must be the ciphertext in binary form.</p>
-<p>Base64 handling: providers often return ciphertext as Base64. You can either:
-- decode in the template with <code>b64dec</code> (for example: <code>(.password_encrypted_base64 | b64dec)</code>), or
-- set <code>decodingStrategy: Base64</code> on the corresponding <code>spec.data.remoteRef</code> so the template receives binary data.</p>
-<p>Prerequisites
-- <code>spec.target.template.engineVersion: v2</code>.
-- A valid RSA private key in PEM format without passphrase (from another reference in the same ExternalSecret).
-- Ciphertext must match the key pair and the chosen algorithm/hash.</p>
+<p>Base64 handling: providers often return ciphertext as Base64. You can either:</p>
+<ul>
+<li>decode in the template with <code>b64dec</code> (for example: <code>(.password_encrypted_base64 | b64dec)</code>), or</li>
+<li>set <code>decodingStrategy: Base64</code> on the corresponding <code>spec.data.remoteRef</code> so the template receives binary data.</li>
+</ul>
+<p>Prerequisites</p>
+<ul>
+<li><code>spec.target.template.engineVersion: v2</code>.</li>
+<li>A valid RSA private key in PEM format without passphrase (from another reference in the same ExternalSecret).</li>
+<li>Ciphertext must match the key pair and the chosen algorithm/hash.</li>
+</ul>
 <p>Full example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-secrets.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ExternalSecret</span>
@@ -5586,12 +5621,16 @@ NtFUGA95RGN9s+pl6XY0YARPHf5O76ErC1OZtDTR5RdyQfcM+94gYZsexsXl0aQO
 <span class="w">  </span><span class="c1">#     decodingStrategy: Base64</span>
 <span class="w">  </span><span class="c1"># ...</span>
 </code></pre></div>
-<p>Useful variations (included as comments in the example):
-- Base64 decode in the template with <code>b64dec</code> or via <code>decodingStrategy: Base64</code> on <code>spec.data</code>.
-- Use a private key available in the same ExternalSecret (for example: <code>( .private_key | rsaDecrypt ... )</code>).</p>
-<p>Error notes
-- Referencing a missing key in the template will fail rendering.
-- If key/algorithm/hash do not match the ciphertext, decryption will fail and reconciliation will retry.</p>
+<p>Useful variations (included as comments in the example):</p>
+<ul>
+<li>Base64 decode in the template with <code>b64dec</code> or via <code>decodingStrategy: Base64</code> on <code>spec.data</code>.</li>
+<li>Use a private key available in the same ExternalSecret (for example: <code>( .private_key | rsaDecrypt ... )</code>).</li>
+</ul>
+<p>Error notes</p>
+<ul>
+<li>Referencing a missing key in the template will fail rendering.</li>
+<li>If key/algorithm/hash do not match the ciphertext, decryption will fail and reconciliation will retry.</li>
+</ul>
 <h2 id="templating-with-pushsecret">Templating with PushSecret</h2>
 <p><code>PushSecret</code> templating is much like <code>ExternalSecrets</code> templating. In-fact under the hood, it's using the same data structure.
 Which means, anything described in the above should be possible with push secret as well resulting in a templated secret
@@ -5765,7 +5804,9 @@ created at the provider.</p>
         
       </main>
       
-<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=6658a9eb-067d-49f1-94f2-b8b00f21451e"  alt=""/>
+<img referrerpolicy="no-referrer-when-downgrade"
+  src="https://static.scarf.sh/a.png?x-pxid=6658a9eb-067d-49f1-94f2-b8b00f21451e" alt=""
+  hidden />
   
         <footer class="md-footer">
   

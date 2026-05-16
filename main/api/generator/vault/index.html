@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#example-manifest" class="md-skip">
+        <a href="#passing-parameters" class="md-skip">
           Skip to content
         </a>
       
@@ -1090,6 +1090,8 @@
       
         
       
+        
+      
     
     
     
@@ -1317,6 +1319,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../grafana/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grafana
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../quay/" class="md-nav__link">
         
   
@@ -1399,6 +1429,17 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#passing-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passing parameters
+      
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#example-manifest" class="md-nav__link">
@@ -4866,6 +4907,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#passing-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passing parameters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#example-manifest" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4910,7 +4962,16 @@ and <code>parameters</code> values to the Generator spec (see example below).</p
 are stored into the resulting Secret in JSON format. The generator exposes <code>data</code>
 section of the response from Vault API by default. To adjust the behaviour, use
 <code>resultType</code> key.</p>
+<h3 id="passing-parameters">Passing parameters</h3>
+<ul>
+<li><code>parameters</code> is a JSON body sent on write methods (POST, PUT, etc.) and
+  supports arbitrary nested JSON. It is <strong>ignored</strong> on <code>GET</code> and <code>LIST</code>.</li>
+<li><code>getParameters</code> is a <code>map[string][]string</code> sent as the query string on <code>GET</code>
+  calls. Each key may map to multiple values, matching HTTP query-string
+  semantics. It is ignored for non-GET methods.</li>
+</ul>
 <h2 id="example-manifest">Example manifest</h2>
+<p>Write method (POST) with a JSON body:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generators.external-secrets.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VaultDynamicSecret</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -4923,6 +4984,30 @@ section of the response from Vault API by default. To adjust the behaviour, use
 <span class="w">    </span><span class="nt">ip_sans</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1,127.0.0.11&quot;</span>
 <span class="w">  </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Data&quot;</span><span class="w">  </span><span class="c1"># &quot;Auth&quot; and &quot;Raw&quot; are also available</span>
 <span class="w">  </span><span class="nt">provider</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://vault.default.svc.cluster.local:8200&quot;</span>
+<span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">kubernetes</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;kubernetes&quot;</span>
+<span class="w">        </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;external-secrets-operator&quot;</span>
+<span class="w">        </span><span class="nt">serviceAccountRef</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;default&quot;</span>
+</code></pre></div>
+<p>GET method with query-string parameters:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generators.external-secrets.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VaultDynamicSecret</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;vault-get-example&quot;</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/kv/data/example&quot;</span>
+<span class="w">  </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;GET&quot;</span>
+<span class="w">  </span><span class="c1"># Query string parameters for GET calls (each key may map to multiple values).</span>
+<span class="w">  </span><span class="c1"># These are ignored for non-GET methods; use `parameters` for write bodies.</span>
+<span class="w">  </span><span class="nt">getParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">version</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
+<span class="w">  </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Data&quot;</span><span class="w">  </span><span class="c1"># &quot;Auth&quot; and &quot;Raw&quot; are also available</span>
+<span class="w">  </span><span class="nt">provider</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># For production, always use &quot;https&quot; and ensure the additional TLS parameters are configured accordingly.</span>
 <span class="w">    </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://vault.default.svc.cluster.local:8200&quot;</span>
 <span class="w">    </span><span class="nt">auth</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">kubernetes</span><span class="p">:</span>
@@ -4971,7 +5056,9 @@ section of the response from Vault API by default. To adjust the behaviour, use
         
       </main>
       
-<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=6658a9eb-067d-49f1-94f2-b8b00f21451e"  alt=""/>
+<img referrerpolicy="no-referrer-when-downgrade"
+  src="https://static.scarf.sh/a.png?x-pxid=6658a9eb-067d-49f1-94f2-b8b00f21451e" alt=""
+  hidden />
   
         <footer class="md-footer">
   

@@ -1197,6 +1197,8 @@
       
         
       
+        
+      
     
     
     
@@ -1406,6 +1408,34 @@
     
   
     Google Container Registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/generator/grafana/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grafana
   
 
     
@@ -5022,10 +5052,12 @@ the <code>external-secrets.io/force-sync</code> annotation on the ClusterExterna
 <div class="highlight"><pre><span></span><code>kubectl get es my-external-secret -o yaml | grep refreshTime
   refreshTime: &quot;2022-05-21T23:02:47Z&quot;
 </code></pre></div>
-<p>The interval can be changed by the <code>spec.refreshInterval</code> in the ExternalSecret. You can also control the refresh behavior by setting <code>spec.refreshPolicy</code> to one of the following options:
-- <code>Periodic</code> (default): Update regularly based on refreshInterval
-- <code>CreatedOnce</code>: Create the Secret only once and never update it afterward
-- <code>OnChange</code>: Only update when the ExternalSecret's metadata or specification changes</p>
+<p>The interval can be changed by the <code>spec.refreshInterval</code> in the ExternalSecret. You can also control the refresh behavior by setting <code>spec.refreshPolicy</code> to one of the following options:</p>
+<ul>
+<li><code>Periodic</code> (default): Update regularly based on refreshInterval</li>
+<li><code>CreatedOnce</code>: Create the Secret only once and never update it afterward</li>
+<li><code>OnChange</code>: Only update when the ExternalSecret's metadata or specification changes</li>
+</ul>
 <h2 id="how-do-i-know-when-the-status-of-my-secret-changed-the-last-time">How do I know when the status of my secret changed the last time?</h2>
 <p>Every ExternalSecret resource contains a status condition that indicates whether a secret was successfully synchronized, along with the timestamp of the last status change of the ExternalSecret (e.g. from SecretSyncedError to SecretSynced). This can be obtained from the field <code>lastTransitionTime</code>:</p>
 <div class="highlight"><pre><span></span><code>kubectl get es my-external-secret -o yaml | grep condition -A 5
@@ -5104,7 +5136,9 @@ Beware that the tool points the SecretStores to use KES Service Account, so you'
         
       </main>
       
-<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=6658a9eb-067d-49f1-94f2-b8b00f21451e"  alt=""/>
+<img referrerpolicy="no-referrer-when-downgrade"
+  src="https://static.scarf.sh/a.png?x-pxid=6658a9eb-067d-49f1-94f2-b8b00f21451e" alt=""
+  hidden />
   
         <footer class="md-footer">
   
